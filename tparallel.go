@@ -77,14 +77,15 @@ func getTestMap(ssaanalyzer *buildssa.SSA, testTyp types.Type) map[*ssa.Function
 
 	trun := analysisutil.MethodOf(testTyp, "Run")
 	for _, f := range ssaanalyzer.SrcFuncs {
-		if strings.HasPrefix(f.Name(), "Test") && f.Parent() == (*ssa.Function)(nil) {
-			testMap[f] = []*ssa.Function{}
-			for _, block := range f.Blocks {
-				for _, instr := range block.Instrs {
-					called := analysisutil.Called(instr, nil, trun)
-					if called {
-						testMap[f] = appendTestMap(testMap[f], instr)
-					}
+		if !strings.HasPrefix(f.Name(), "Test") || !(f.Parent() == (*ssa.Function)(nil)) {
+			continue
+		}
+		testMap[f] = []*ssa.Function{}
+		for _, block := range f.Blocks {
+			for _, instr := range block.Instrs {
+				called := analysisutil.Called(instr, nil, trun)
+				if called {
+					testMap[f] = appendTestMap(testMap[f], instr)
 				}
 			}
 		}
@@ -106,5 +107,6 @@ func appendTestMap(subtests []*ssa.Function, instr ssa.Instruction) []*ssa.Funct
 			subtests = append(subtests, arg)
 		}
 	}
+
 	return subtests
 }
