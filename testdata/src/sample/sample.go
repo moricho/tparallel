@@ -66,9 +66,9 @@ func Test_Func4(t *testing.T) { // OK
 	defer teardown()
 }
 
-func Test_Func5(t *testing.T) { // NG: cleanup
+func Test_Func5(t *testing.T) { // want "Test_Func5 should use t.Cleanup"
 	teardown := setup("Test_Func5")
-	defer teardown() // want "Test_Func5 should use t.Cleanup instead of defer"
+	defer teardown()
 
 	t.Parallel()
 

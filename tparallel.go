@@ -33,18 +33,30 @@ func run(pass *analysis.Pass) (interface{}, error) {
 		return nil, nil
 	}
 
+	testCommonTyp := analysisutil.TypeOf(pass, "testing", "common")
+	if testCommonTyp == nil {
+		// skip checking
+		return nil, nil
+	}
+
 	parallel := analysisutil.MethodOf(testTyp, "Parallel")
+	cleanup := analysisutil.MethodOf(testCommonTyp, "Cleanup")
 
 	testMap := getTestMap(ssaanalyzer, testTyp)
 	for top, subs := range testMap {
-		isParallelTop := isParallel(top, parallel)
+		isParallelTop := isCalled(top, parallel)
 
 		isPararellSub := false
 		for _, sub := range subs {
-			isPararellSub = isParallel(sub, parallel)
+			isPararellSub = isCalled(sub, parallel)
 			if isPararellSub {
 				break
 			}
+		}
+
+		useCleanup := isCalled(top, cleanup)
+		if isPararellSub && !useCleanup {
+			pass.Reportf(top.Pos(), "%s should use t.Cleanup", top.Name())
 		}
 
 		if isParallelTop == isPararellSub {
@@ -59,7 +71,7 @@ func run(pass *analysis.Pass) (interface{}, error) {
 	return nil, nil
 }
 
-func isParallel(f *ssa.Function, typ *types.Func) bool {
+func isCalled(f *ssa.Function, typ *types.Func) bool {
 	for _, block := range f.Blocks {
 		for _, instr := range block.Instrs {
 			called := analysisutil.Called(instr, nil, typ)
