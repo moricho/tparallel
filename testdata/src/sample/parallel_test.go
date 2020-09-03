@@ -65,32 +65,3 @@ func Test_Func4(t *testing.T) { // OK
 	teardown := setup("Test_Func4")
 	defer teardown()
 }
-
-func Test_Func5(t *testing.T) { // want "Test_Func5 should use t.Cleanup"
-	teardown := setup("Test_Func5")
-	defer teardown()
-
-	t.Parallel()
-
-	t.Run("Func5_Sub1", func(t *testing.T) {
-		call("Func5_Sub1")
-		t.Parallel()
-	})
-
-	t.Run("Func5_Sub2", func(t *testing.T) {
-		call("Func1_Sub2")
-	})
-}
-
-func Test_Func6(t *testing.T) { // OK
-	teardown := setup("Test_Func6")
-	defer teardown()
-
-	t.Run("Func6_Sub1", func(t *testing.T) {
-		call("Func6_Sub1")
-	})
-
-	t.Run("Func6_Sub2", func(t *testing.T) {
-		call("Func6_Sub2")
-	})
-}
