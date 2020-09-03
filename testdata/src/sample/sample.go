@@ -66,33 +66,31 @@ func Test_Func4(t *testing.T) { // OK
 	defer teardown()
 }
 
-// func Test_Func1(t *testing.T) { // NG: cleanup
-// 	teardown := setup("Test_Func1")
-// 	defer teardown() // "Test_Func1 should use t.Cleanup() instead of defer"
+func Test_Func5(t *testing.T) { // NG: cleanup
+	teardown := setup("Test_Func5")
+	defer teardown() // want "Test_Func5 should use t.Cleanup instead of defer"
 
-// 	t.Parallel()
+	t.Parallel()
 
-// 	t.Run("Func1_Sub1", func(t *testing.T) {
-// 		call("Func1_Sub1")
-// 		t.Parallel()
-// 	})
+	t.Run("Func5_Sub1", func(t *testing.T) {
+		call("Func5_Sub1")
+		t.Parallel()
+	})
 
-// 	t.Run("Func1_Sub2", func(t *testing.T) {
-// 		call("Func1_Sub2")
-// 		t.Parallel()
-// 	})
-// }
+	t.Run("Func5_Sub2", func(t *testing.T) {
+		call("Func1_Sub2")
+	})
+}
 
-// func Test_Func4(t *testing.T) { // OK
-// 	teardown := setup("Test_Func4")
-// 	defer teardown()
-// 	t.Parallel()
+func Test_Func6(t *testing.T) { // OK
+	teardown := setup("Test_Func6")
+	defer teardown()
 
-// 	t.Run("Func4_Sub1", func(t *testing.T) {
-// 		call("Func4_Sub1")
-// 	})
+	t.Run("Func6_Sub1", func(t *testing.T) {
+		call("Func6_Sub1")
+	})
 
-// 	t.Run("Func4_Sub2", func(t *testing.T) {
-// 		call("Func4_Sub2")
-// 	})
-// }
+	t.Run("Func6_Sub2", func(t *testing.T) {
+		call("Func6_Sub2")
+	})
+}
