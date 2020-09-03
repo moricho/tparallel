@@ -37,26 +37,13 @@ func run(pass *analysis.Pass) (interface{}, error) {
 
 	testMap := getTestMap(ssaanalyzer, testTyp)
 	for top, subs := range testMap {
-		isParallelTop, isPararellSub := false, false
-		for _, block := range top.Blocks {
-			for _, instr := range block.Instrs {
-				called := analysisutil.Called(instr, nil, parallel)
-				if called {
-					isParallelTop = true
-					break
-				}
-			}
-		}
+		isParallelTop := isParallel(top, parallel)
 
+		isPararellSub := false
 		for _, sub := range subs {
-			for _, block := range sub.Blocks {
-				for _, instr := range block.Instrs {
-					called := analysisutil.Called(instr, nil, parallel)
-					if called {
-						isPararellSub = true
-						break
-					}
-				}
+			isPararellSub = isParallel(sub, parallel)
+			if isPararellSub {
+				break
 			}
 		}
 
@@ -70,6 +57,18 @@ func run(pass *analysis.Pass) (interface{}, error) {
 	}
 
 	return nil, nil
+}
+
+func isParallel(f *ssa.Function, typ *types.Func) bool {
+	for _, block := range f.Blocks {
+		for _, instr := range block.Instrs {
+			called := analysisutil.Called(instr, nil, typ)
+			if called {
+				return true
+			}
+		}
+	}
+	return false
 }
 
 func getTestMap(ssaanalyzer *buildssa.SSA, testTyp types.Type) map[*ssa.Function][]*ssa.Function {
