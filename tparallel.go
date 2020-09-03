@@ -1,7 +1,6 @@
 package tparallel
 
 import (
-	"fmt"
 	"go/types"
 	"strings"
 
@@ -76,29 +75,6 @@ func run(pass *analysis.Pass) (interface{}, error) {
 func getTestMap(ssaanalyzer *buildssa.SSA, testTyp types.Type) map[*ssa.Function][]*ssa.Function {
 	testMap := map[*ssa.Function][]*ssa.Function{}
 
-	for _, f := range ssaanalyzer.SrcFuncs {
-		if strings.HasPrefix(f.Name(), "Test") && f.Parent() == (*ssa.Function)(nil) {
-			testMap[f] = []*ssa.Function{}
-		}
-	}
-
-	for _, f := range ssaanalyzer.SrcFuncs {
-		p := f.Parent()
-		if _, ok := testMap[p]; !ok {
-			continue
-		}
-
-		if len(f.Params) == 1 && types.Identical(testTyp, f.Params[0].Type()) {
-			testMap[p] = append(testMap[p], f)
-		}
-	}
-
-	return testMap
-}
-
-func getTestMap2(ssaanalyzer *buildssa.SSA, testTyp types.Type) map[*ssa.Function][]*ssa.Function {
-	testMap := map[*ssa.Function][]*ssa.Function{}
-
 	trun := analysisutil.MethodOf(testTyp, "Run")
 	for _, f := range ssaanalyzer.SrcFuncs {
 		if strings.HasPrefix(f.Name(), "Test") && f.Parent() == (*ssa.Function)(nil) {
@@ -107,10 +83,7 @@ func getTestMap2(ssaanalyzer *buildssa.SSA, testTyp types.Type) map[*ssa.Functio
 				for _, instr := range block.Instrs {
 					called := analysisutil.Called(instr, nil, trun)
 					if called {
-						fmt.Println("ここでinstrの中から、t.Run()の引数である無名関数を取得したい")
-						for _, v := range instr.Operands(nil) {
-							fmt.Printf("%+v\n", v)
-						}
+						testMap[f] = appendTestMap(testMap[f], instr)
 					}
 				}
 			}
@@ -118,4 +91,20 @@ func getTestMap2(ssaanalyzer *buildssa.SSA, testTyp types.Type) map[*ssa.Functio
 	}
 
 	return testMap
+}
+
+func appendTestMap(subtests []*ssa.Function, instr ssa.Instruction) []*ssa.Function {
+	call, ok := instr.(ssa.CallInstruction)
+	if !ok {
+		return subtests
+	}
+
+	ssaCall := call.Value()
+	for _, arg := range ssaCall.Call.Args {
+		switch arg := arg.(type) {
+		case *ssa.Function:
+			subtests = append(subtests, arg)
+		}
+	}
+	return subtests
 }
