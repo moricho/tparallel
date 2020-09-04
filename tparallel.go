@@ -7,11 +7,10 @@ import (
 	"github.com/gostaticanalysis/analysisutil"
 	"golang.org/x/tools/go/analysis"
 	"golang.org/x/tools/go/analysis/passes/buildssa"
-	"golang.org/x/tools/go/analysis/passes/inspect"
 	"golang.org/x/tools/go/ssa"
 )
 
-const doc = "tparallel is ..."
+const doc = "tparallel detects inappropriate usage of t.Parallel() method in your Go test codes."
 
 // Analyzer is ...
 var Analyzer = &analysis.Analyzer{
@@ -19,7 +18,6 @@ var Analyzer = &analysis.Analyzer{
 	Doc:  doc,
 	Run:  run,
 	Requires: []*analysis.Analyzer{
-		inspect.Analyzer,
 		buildssa.Analyzer,
 	},
 }
@@ -42,7 +40,7 @@ func run(pass *analysis.Pass) (interface{}, error) {
 	parallel := analysisutil.MethodOf(testTyp, "Parallel")
 	cleanup := analysisutil.MethodOf(testCommonTyp, "Cleanup")
 
-	testMap := getTestMap(ssaanalyzer, testTyp)
+	testMap := getTestMap(ssaanalyzer, testTyp) // {Test1: [TestSub1, TestSub2], Test2: [TestSub1, TestSub2, TestSub3], ...}
 	for top, subs := range testMap {
 		isParallelTop := isCalled(top, parallel)
 
@@ -85,6 +83,7 @@ func isDeferCalled(f *ssa.Function) bool {
 	return false
 }
 
+// isCalled checks whether a given types.Func is called in a ssa.Function
 func isCalled(f *ssa.Function, typ *types.Func) bool {
 	for _, block := range f.Blocks {
 		for _, instr := range block.Instrs {
@@ -97,6 +96,7 @@ func isCalled(f *ssa.Function, typ *types.Func) bool {
 	return false
 }
 
+// getTestMap gets a set of a top-level test and its sub-tests
 func getTestMap(ssaanalyzer *buildssa.SSA, testTyp types.Type) map[*ssa.Function][]*ssa.Function {
 	testMap := map[*ssa.Function][]*ssa.Function{}
 
@@ -119,6 +119,7 @@ func getTestMap(ssaanalyzer *buildssa.SSA, testTyp types.Type) map[*ssa.Function
 	return testMap
 }
 
+// appendTestMap converts ssa.Instruction to ssa.Function and append it to a given sub-test slice
 func appendTestMap(subtests []*ssa.Function, instr ssa.Instruction) []*ssa.Function {
 	call, ok := instr.(ssa.CallInstruction)
 	if !ok {
