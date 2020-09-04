@@ -4,10 +4,13 @@
 [![MIT License](http://img.shields.io/badge/license-MIT-blue.svg?style=flat)](LICENSE)
 
 `tparallel` finds inappropriate usage of `t.Parallel()` method in your Go test codes.  
+It detects the following:  
+- `t.Parallel()` is called for either a top-level test function or a sub-test function
+- Although `t.Parallel()` is called in the sub-test function, it is post-processed by `defer` instead of `t.Cleanup()`
   
 This tool was inspired by this blog: [Go言語でのテストの並列化 〜t.Parallel()メソッドを理解する〜](https://engineering.mercari.com/blog/entry/how_to_use_t_parallel/)
 
-## Install
+## Installation
 
 ```sh
 $ go get github.com/moricho/tparallel/cmd/tparallel
