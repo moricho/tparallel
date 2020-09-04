@@ -12,7 +12,8 @@ import (
 
 const doc = "tparallel detects inappropriate usage of t.Parallel() method in your Go test codes."
 
-// Analyzer is ...
+// Analyzer analyzes Go test codes whether they use t.Parallel() appropriately
+// by using SSA (Single Static Assignment)
 var Analyzer = &analysis.Analyzer{
 	Name: "tparallel",
 	Doc:  doc,
@@ -25,20 +26,17 @@ var Analyzer = &analysis.Analyzer{
 func run(pass *analysis.Pass) (interface{}, error) {
 	ssaanalyzer := pass.ResultOf[buildssa.Analyzer].(*buildssa.SSA)
 
-	testTyp := analysisutil.TypeOf(pass, "testing", "*T")
-	if testTyp == nil {
+	obj := analysisutil.ObjectOf(pass, "testing", "T")
+	if obj == nil {
 		// skip checking
 		return nil, nil
 	}
+	testTyp, testPkg := obj.Type(), obj.Pkg()
 
-	testCommonTyp := analysisutil.TypeOf(pass, "testing", "common")
-	if testCommonTyp == nil {
-		// skip checking
-		return nil, nil
-	}
-
-	parallel := analysisutil.MethodOf(testTyp, "Parallel")
-	cleanup := analysisutil.MethodOf(testCommonTyp, "Cleanup")
+	p, _, _ := types.LookupFieldOrMethod(testTyp, true, testPkg, "Parallel")
+	parallel, _ := p.(*types.Func)
+	c, _, _ := types.LookupFieldOrMethod(testTyp, true, testPkg, "Cleanup")
+	cleanup, _ := c.(*types.Func)
 
 	testMap := getTestMap(ssaanalyzer, testTyp) // {Test1: [TestSub1, TestSub2], Test2: [TestSub1, TestSub2, TestSub3], ...}
 	for top, subs := range testMap {
@@ -83,14 +81,12 @@ func isDeferCalled(f *ssa.Function) bool {
 	return false
 }
 
-// isCalled checks whether a given types.Func is called in a ssa.Function
 func isCalled(f *ssa.Function, typ *types.Func) bool {
-	for _, block := range f.Blocks {
-		for _, instr := range block.Instrs {
-			called := analysisutil.Called(instr, nil, typ)
-			if called {
-				return true
-			}
+	block := f.Blocks[0]
+	for _, instr := range block.Instrs {
+		called := analysisutil.Called(instr, nil, typ)
+		if called {
+			return true
 		}
 	}
 	return false
