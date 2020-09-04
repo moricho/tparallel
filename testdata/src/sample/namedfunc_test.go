@@ -16,9 +16,13 @@ func testFn3(t *testing.T) {
 	call("Named3_Sub")
 }
 
-func Test_Named1(t *testing.T) { // want "Test_Named1 should call t.Parallel on the top level"
+func testFn4(t *testing.T) {
+	call("Named4_Sub")
+}
+
+func Test_Named1(t *testing.T) { // want "Test_Named1 should call t.Parallel on the top level" "Test_Named1 should use t.Cleanup"
 	teardown := setup("Test_Named1")
-	t.Cleanup(teardown)
+	defer teardown()
 
 	fn := testFn1
 
@@ -29,7 +33,7 @@ func Test_Named1(t *testing.T) { // want "Test_Named1 should call t.Parallel on 
 
 func Test_Named2(t *testing.T) { // want "Test_Named2's sub tests should call t.Parallel"
 	teardown := setup("Test_Named1")
-	t.Cleanup(teardown)
+	defer teardown()
 	t.Parallel()
 
 	fn := testFn2
@@ -49,4 +53,26 @@ func Test_Named3(t *testing.T) { // OK
 	t.Run("Named3_Sub1", fn)
 
 	t.Run("Named3_Sub2", fn)
+}
+
+func Test_Named4(t *testing.T) { // want "Test_Named4's sub tests should call t.Parallel"
+	teardown := setup("Test_Named4")
+	t.Cleanup(teardown)
+	t.Parallel()
+
+	tests := []struct {
+		name string
+	}{
+		{
+			name: "Named4_Sub1",
+		},
+		{
+			name: "Named4_Sub2",
+		},
+	}
+
+	fn := testFn4
+	for _, tt := range tests {
+		t.Run(tt.name, fn)
+	}
 }
