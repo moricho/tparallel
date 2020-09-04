@@ -4,6 +4,7 @@
 [![MIT License](http://img.shields.io/badge/license-MIT-blue.svg?style=flat)](LICENSE)
 
 `tparallel` finds inappropriate usage of `t.Parallel()` method in your Go test codes.  
+  
 This tool was inspired by this blog: [Go言語でのテストの並列化 〜t.Parallel()メソッドを理解する〜](https://engineering.mercari.com/blog/entry/how_to_use_t_parallel/)
 
 ## Install
