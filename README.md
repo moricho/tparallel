@@ -12,6 +12,20 @@ This tool was inspired by this blog: [Go言語でのテストの並列化 〜t.P
 
 ## Installation
 
+### From GitHub Releases
+Please see [GitHub Releases](https://github.com/moricho/tparallel/releases).  
+Available binaries are:
+- macOS
+- Linux
+- Windows
+
+### macOS
+``` sh
+$ brew tap moricho/tparallel
+$ brew install tparallel
+```
+
+### go get
 ```sh
 $ go get -u github.com/moricho/tparallel/cmd/tparallel
 ```
