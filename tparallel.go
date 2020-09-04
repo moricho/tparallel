@@ -54,9 +54,11 @@ func run(pass *analysis.Pass) (interface{}, error) {
 			}
 		}
 
-		useCleanup := isCalled(top, cleanup)
-		if isPararellSub && !useCleanup {
-			pass.Reportf(top.Pos(), "%s should use t.Cleanup", top.Name())
+		if isDeferCalled(top) {
+			useCleanup := isCalled(top, cleanup)
+			if isPararellSub && !useCleanup {
+				pass.Reportf(top.Pos(), "%s should use t.Cleanup instead of defer", top.Name())
+			}
 		}
 
 		if isParallelTop == isPararellSub {
@@ -69,6 +71,18 @@ func run(pass *analysis.Pass) (interface{}, error) {
 	}
 
 	return nil, nil
+}
+
+func isDeferCalled(f *ssa.Function) bool {
+	for _, block := range f.Blocks {
+		for _, instr := range block.Instrs {
+			switch instr.(type) {
+			case *ssa.Defer:
+				return true
+			}
+		}
+	}
+	return false
 }
 
 func isCalled(f *ssa.Function, typ *types.Func) bool {
