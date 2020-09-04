@@ -13,7 +13,7 @@ This tool was inspired by this blog: [Go言語でのテストの並列化 〜t.P
 ## Installation
 
 ```sh
-$ go get github.com/moricho/tparallel/cmd/tparallel
+$ go get -u github.com/moricho/tparallel/cmd/tparallel
 ```
 
 ## Usage
