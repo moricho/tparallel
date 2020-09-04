@@ -1,8 +1,6 @@
 package sample
 
-import (
-	"testing"
-)
+import "testing"
 
 func Test_Cleanup1(t *testing.T) { // want "Test_Cleanup1 should use t.Cleanup"
 	teardown := setup("Test_Cleanup1")

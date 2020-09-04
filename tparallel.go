@@ -116,6 +116,9 @@ func appendTestMap(subtests []*ssa.Function, instr ssa.Instruction) []*ssa.Funct
 		switch arg := arg.(type) {
 		case *ssa.Function:
 			subtests = append(subtests, arg)
+		case *ssa.MakeClosure:
+			fn, _ := arg.Fn.(*ssa.Function)
+			subtests = append(subtests, fn)
 		}
 	}
 
