@@ -2,7 +2,6 @@ package tparallel
 
 import (
 	"go/types"
-	"strings"
 
 	"github.com/gostaticanalysis/analysisutil"
 	"golang.org/x/tools/go/analysis"
@@ -38,10 +37,9 @@ func run(pass *analysis.Pass) (interface{}, error) {
 	c, _, _ := types.LookupFieldOrMethod(testTyp, true, testPkg, "Cleanup")
 	cleanup, _ := c.(*types.Func)
 
-	testMap := getTestMap(ssaanalyzer, testTyp) // {Test1: [TestSub1, TestSub2], Test2: [TestSub1, TestSub2, TestSub3], ...}
+	testMap := getTestMap(ssaanalyzer, testTyp) // ex. {Test1: [TestSub1, TestSub2], Test2: [TestSub1, TestSub2, TestSub3], ...}
 	for top, subs := range testMap {
 		isParallelTop := isCalled(top, parallel)
-
 		isPararellSub := false
 		for _, sub := range subs {
 			isPararellSub = isCalled(sub, parallel)
@@ -90,48 +88,4 @@ func isCalled(f *ssa.Function, typ *types.Func) bool {
 		}
 	}
 	return false
-}
-
-// getTestMap gets a set of a top-level test and its sub-tests
-func getTestMap(ssaanalyzer *buildssa.SSA, testTyp types.Type) map[*ssa.Function][]*ssa.Function {
-	testMap := map[*ssa.Function][]*ssa.Function{}
-
-	trun := analysisutil.MethodOf(testTyp, "Run")
-	for _, f := range ssaanalyzer.SrcFuncs {
-		if !strings.HasPrefix(f.Name(), "Test") || !(f.Parent() == (*ssa.Function)(nil)) {
-			continue
-		}
-		testMap[f] = []*ssa.Function{}
-		for _, block := range f.Blocks {
-			for _, instr := range block.Instrs {
-				called := analysisutil.Called(instr, nil, trun)
-				if called {
-					testMap[f] = appendTestMap(testMap[f], instr)
-				}
-			}
-		}
-	}
-
-	return testMap
-}
-
-// appendTestMap converts ssa.Instruction to ssa.Function and append it to a given sub-test slice
-func appendTestMap(subtests []*ssa.Function, instr ssa.Instruction) []*ssa.Function {
-	call, ok := instr.(ssa.CallInstruction)
-	if !ok {
-		return subtests
-	}
-
-	ssaCall := call.Value()
-	for _, arg := range ssaCall.Call.Args {
-		switch arg := arg.(type) {
-		case *ssa.Function:
-			subtests = append(subtests, arg)
-		case *ssa.MakeClosure:
-			fn, _ := arg.Fn.(*ssa.Function)
-			subtests = append(subtests, fn)
-		}
-	}
-
-	return subtests
 }
