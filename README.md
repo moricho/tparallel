@@ -95,6 +95,6 @@ func Test_Table2(t *testing.T) {
 ```console
 # github.com/moricho/tparallel/testdata/src/sample
 testdata/src/sample/table_test.go:7:6: Test_Table1 should use t.Cleanup
-testdata/src/sample/table_test.go:7:6: Test_Table1 should call t.Parallel on the top level
-testdata/src/sample/table_test.go:30:6: Test_Table2's sub tests should call t.Parallel
+testdata/src/sample/table_test.go:7:6: Test_Table1 should call t.Parallel on the top level as well as its subtests
+testdata/src/sample/table_test.go:30:6: Test_Table2's subtests should call t.Parallel
 ```

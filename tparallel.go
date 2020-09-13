@@ -60,9 +60,9 @@ func run(pass *analysis.Pass) (interface{}, error) {
 		if isParallelTop == isPararellSub {
 			continue
 		} else if isPararellSub {
-			pass.Reportf(top.Pos(), "%s should call t.Parallel on the top level", top.Name())
+			pass.Reportf(top.Pos(), "%s should call t.Parallel on the top level as well as its subtests", top.Name())
 		} else if isParallelTop {
-			pass.Reportf(top.Pos(), "%s's sub tests should call t.Parallel", top.Name())
+			pass.Reportf(top.Pos(), "%s's subtests should call t.Parallel", top.Name())
 		}
 	}
 

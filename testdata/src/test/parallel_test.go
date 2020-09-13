@@ -16,7 +16,7 @@ func setup(name string) func() {
 	}
 }
 
-func Test_Func1(t *testing.T) { // want "Test_Func1 should call t.Parallel on the top level"
+func Test_Func1(t *testing.T) { // want "Test_Func1 should call t.Parallel on the top level as well as its subtests"
 	teardown := setup("Test_Func1")
 	t.Cleanup(teardown)
 
@@ -31,7 +31,7 @@ func Test_Func1(t *testing.T) { // want "Test_Func1 should call t.Parallel on th
 	})
 }
 
-func Test_Func2(t *testing.T) { // want "Test_Func2's sub tests should call t.Parallel"
+func Test_Func2(t *testing.T) { // want "Test_Func2's subtests should call t.Parallel"
 	teardown := setup("Test_Func2")
 	t.Cleanup(teardown)
 	t.Parallel()

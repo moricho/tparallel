@@ -4,7 +4,7 @@ import (
 	"testing"
 )
 
-func Test_Table1(t *testing.T) { // want "Test_Table1 should call t.Parallel on the top level" "Test_Table1 should use t.Cleanup"
+func Test_Table1(t *testing.T) { // want "Test_Table1 should call t.Parallel on the top level as well as its subtests" "Test_Table1 should use t.Cleanup"
 	teardown := setup("Test_Table1")
 	defer teardown()
 
@@ -27,7 +27,7 @@ func Test_Table1(t *testing.T) { // want "Test_Table1 should call t.Parallel on 
 	}
 }
 
-func Test_Table2(t *testing.T) { // want "Test_Table2's sub tests should call t.Parallel"
+func Test_Table2(t *testing.T) { // want "Test_Table2's subtests should call t.Parallel"
 	teardown := setup("Test_Table2")
 	t.Cleanup(teardown)
 

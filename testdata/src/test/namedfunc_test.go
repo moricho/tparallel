@@ -20,7 +20,7 @@ func testFn4(t *testing.T) {
 	call("Named4_Sub")
 }
 
-func Test_Named1(t *testing.T) { // want "Test_Named1 should call t.Parallel on the top level" "Test_Named1 should use t.Cleanup"
+func Test_Named1(t *testing.T) { // want "Test_Named1 should call t.Parallel on the top level as well as its subtests" "Test_Named1 should use t.Cleanup"
 	teardown := setup("Test_Named1")
 	defer teardown()
 
@@ -31,7 +31,7 @@ func Test_Named1(t *testing.T) { // want "Test_Named1 should call t.Parallel on 
 	t.Run("Named1_Sub2", fn)
 }
 
-func Test_Named2(t *testing.T) { // want "Test_Named2's sub tests should call t.Parallel"
+func Test_Named2(t *testing.T) { // want "Test_Named2's subtests should call t.Parallel"
 	teardown := setup("Test_Named1")
 	defer teardown()
 	t.Parallel()
@@ -55,7 +55,7 @@ func Test_Named3(t *testing.T) { // OK
 	t.Run("Named3_Sub2", fn)
 }
 
-func Test_Named4(t *testing.T) { // want "Test_Named4's sub tests should call t.Parallel"
+func Test_Named4(t *testing.T) { // want "Test_Named4's subtests should call t.Parallel"
 	teardown := setup("Test_Named4")
 	t.Cleanup(teardown)
 	t.Parallel()
