@@ -7,6 +7,8 @@ import (
 	"github.com/gostaticanalysis/analysisutil"
 	"golang.org/x/tools/go/analysis/passes/buildssa"
 	"golang.org/x/tools/go/ssa"
+
+	"github.com/moricho/tparallel/pkg/ssainstr"
 )
 
 // getTestMap gets a set of a top-level test and its sub-tests
@@ -22,7 +24,12 @@ func getTestMap(ssaanalyzer *buildssa.SSA, testTyp types.Type) map[*ssa.Function
 		for _, block := range f.Blocks {
 			for _, instr := range block.Instrs {
 				called := analysisutil.Called(instr, nil, trun)
-				if called {
+
+				if !called && ssainstr.HasArgs(instr, types.NewPointer(testTyp)) {
+					if ssainstr.IsCalled(instr, trun) {
+						testMap[f] = appendTestMap(testMap[f], instr)
+					}
+				} else if called {
 					testMap[f] = appendTestMap(testMap[f], instr)
 				}
 			}
