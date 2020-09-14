@@ -39,6 +39,13 @@ func tRun5(t *testing.T) { // OK
 	})
 }
 
+func tRun6(t *testing.T) { // OK
+	t.Run("Named_tRun6_Sub1", func(t *testing.T) {
+		t.Parallel()
+		call("Named_tRun6_Sub1")
+	})
+}
+
 func Test_Named_tRun1(t *testing.T) {
 	call("Test_Named_tRun1")
 
@@ -71,4 +78,17 @@ func Test_Named_tRun5(t *testing.T) {
 	call("Test_Named_tRun5")
 
 	tRun5(t)
+}
+
+func Test_Named_tRun6(t *testing.T) { // OK
+	t.Parallel()
+	call("Test_Named_tRun6")
+
+	tRun6(t)
+
+	t.Run("Named_tRun6_Sub2", func(t *testing.T) {
+		t.Parallel()
+		call("Named_tRun6_Sub2")
+	})
+
 }
