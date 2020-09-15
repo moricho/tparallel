@@ -7,7 +7,8 @@ import (
 	"golang.org/x/tools/go/ssa"
 )
 
-func Called(instr ssa.Instruction, fn *types.Func) ([]ssa.Instruction, bool) {
+// LookupCalled looks up ssa.Instruction that call the `fn` func in the given instr
+func LookupCalled(instr ssa.Instruction, fn *types.Func) ([]ssa.Instruction, bool) {
 	instrs := []ssa.Instruction{}
 
 	call, ok := instr.(ssa.CallInstruction)
@@ -41,6 +42,7 @@ func Called(instr ssa.Instruction, fn *types.Func) ([]ssa.Instruction, bool) {
 	return instrs, called
 }
 
+// HasArgs returns whether the given ssa.Instruction has `typ` type args
 func HasArgs(instr ssa.Instruction, typ types.Type) bool {
 	call, ok := instr.(ssa.CallInstruction)
 	if !ok {
