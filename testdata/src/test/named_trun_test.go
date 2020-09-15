@@ -5,8 +5,12 @@ import "testing"
 func tRun1(t *testing.T) { // want "tRun1's subtests should call t.Parallel"
 	t.Parallel()
 
-	t.Run("Named_tRun1_Sub", func(t *testing.T) {
+	t.Run("Named_tRun1_Sub1", func(t *testing.T) {
 		call("Named_tRun1_Sub")
+	})
+
+	t.Run("Named_tRun1_Sub2", func(t *testing.T) {
+		call("Named_tRun1_Sub2")
 	})
 }
 
@@ -33,9 +37,14 @@ func tRun4(t *testing.T) { // OK
 func tRun5(t *testing.T) { // OK
 	t.Parallel()
 
-	t.Run("Named_tRun5_Sub", func(t *testing.T) {
+	t.Run("Named_tRun5_Sub1", func(t *testing.T) {
 		t.Parallel()
-		call("Named_tRun5_Sub")
+		call("Named_tRun5_Sub1")
+	})
+
+	t.Run("Named_tRun5_Sub2", func(t *testing.T) {
+		t.Parallel()
+		call("Named_tRun5_Sub2")
 	})
 }
 

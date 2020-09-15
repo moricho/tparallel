@@ -7,16 +7,18 @@ import (
 	"golang.org/x/tools/go/ssa"
 )
 
-func IsCalled(instr ssa.Instruction, fn *types.Func) bool {
+func Called(instr ssa.Instruction, fn *types.Func) ([]ssa.Instruction, bool) {
+	instrs := []ssa.Instruction{}
+
 	call, ok := instr.(ssa.CallInstruction)
 	if !ok {
-		return false
+		return instrs, false
 	}
 
 	ssaCall := call.Value()
 	common := ssaCall.Common()
 	if common == nil {
-		return false
+		return instrs, false
 	}
 	val := common.Value
 
@@ -25,13 +27,13 @@ func IsCalled(instr ssa.Instruction, fn *types.Func) bool {
 		for _, block := range fnval.Blocks {
 			for _, instr := range block.Instrs {
 				if analysisutil.Called(instr, nil, fn) {
-					return true
+					instrs = append(instrs, instr)
 				}
 			}
 		}
 	}
 
-	return false
+	return instrs, true
 }
 
 func HasArgs(instr ssa.Instruction, typ types.Type) bool {

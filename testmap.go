@@ -26,8 +26,10 @@ func getTestMap(ssaanalyzer *buildssa.SSA, testTyp types.Type) map[*ssa.Function
 				called := analysisutil.Called(instr, nil, trun)
 
 				if !called && ssainstr.HasArgs(instr, types.NewPointer(testTyp)) {
-					if ssainstr.IsCalled(instr, trun) {
-						testMap[f] = appendTestMap(testMap[f], instr)
+					if instrs, ok := ssainstr.Called(instr, trun); ok {
+						for _, v := range instrs {
+							testMap[f] = appendTestMap(testMap[f], v)
+						}
 					}
 				} else if called {
 					testMap[f] = appendTestMap(testMap[f], instr)
