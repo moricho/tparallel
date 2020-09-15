@@ -6,7 +6,8 @@ import (
 	"github.com/gostaticanalysis/analysisutil"
 	"golang.org/x/tools/go/analysis"
 	"golang.org/x/tools/go/analysis/passes/buildssa"
-	"golang.org/x/tools/go/ssa"
+
+	"github.com/moricho/tparallel/pkg/ssafunc"
 )
 
 const doc = "tparallel detects inappropriate usage of t.Parallel() method in your Go test codes."
@@ -39,17 +40,17 @@ func run(pass *analysis.Pass) (interface{}, error) {
 
 	testMap := getTestMap(ssaanalyzer, testTyp) // ex. {Test1: [TestSub1, TestSub2], Test2: [TestSub1, TestSub2, TestSub3], ...}
 	for top, subs := range testMap {
-		isParallelTop := isCalled(top, parallel)
+		isParallelTop := ssafunc.IsCalled(top, parallel)
 		isPararellSub := false
 		for _, sub := range subs {
-			isPararellSub = isCalled(sub, parallel)
+			isPararellSub = ssafunc.IsCalled(sub, parallel)
 			if isPararellSub {
 				break
 			}
 		}
 
-		if isDeferCalled(top) {
-			useCleanup := isCalled(top, cleanup)
+		if ssafunc.IsDeferCalled(top) {
+			useCleanup := ssafunc.IsCalled(top, cleanup)
 			if isPararellSub && !useCleanup {
 				pass.Reportf(top.Pos(), "%s should use t.Cleanup instead of defer", top.Name())
 			}
@@ -65,27 +66,4 @@ func run(pass *analysis.Pass) (interface{}, error) {
 	}
 
 	return nil, nil
-}
-
-func isDeferCalled(f *ssa.Function) bool {
-	for _, block := range f.Blocks {
-		for _, instr := range block.Instrs {
-			switch instr.(type) {
-			case *ssa.Defer:
-				return true
-			}
-		}
-	}
-	return false
-}
-
-func isCalled(f *ssa.Function, typ *types.Func) bool {
-	block := f.Blocks[0]
-	for _, instr := range block.Instrs {
-		called := analysisutil.Called(instr, nil, typ)
-		if called {
-			return true
-		}
-	}
-	return false
 }

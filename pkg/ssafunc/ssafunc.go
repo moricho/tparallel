@@ -4,6 +4,7 @@ import (
 	"go/types"
 
 	"github.com/gostaticanalysis/analysisutil"
+	"github.com/moricho/tparallel/pkg/ssainstr"
 	"golang.org/x/tools/go/ssa"
 )
 
@@ -23,7 +24,7 @@ func IsCalled(f *ssa.Function, fn *types.Func) bool {
 	block := f.Blocks[0]
 	for _, instr := range block.Instrs {
 		called := analysisutil.Called(instr, nil, fn)
-		if called {
+		if _, ok := ssainstr.Called(instr, fn); ok || called {
 			return true
 		}
 	}
