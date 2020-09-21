@@ -40,6 +40,9 @@ func run(pass *analysis.Pass) (interface{}, error) {
 
 	testMap := getTestMap(ssaanalyzer, testTyp) // ex. {Test1: [TestSub1, TestSub2], Test2: [TestSub1, TestSub2, TestSub3], ...}
 	for top, subs := range testMap {
+		if len(subs) == 0 {
+			continue
+		}
 		isParallelTop := ssafunc.IsCalled(top, parallel)
 		isPararellSub := false
 		for _, sub := range subs {
